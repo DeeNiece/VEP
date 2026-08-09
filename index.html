@@ -170,6 +170,7 @@ code{font-family:var(--font-mono);font-size:11px;background:rgba(108,140,255,.1)
 .tab-btn:hover{color:var(--white)}
 .tab-btn.active{color:var(--yellow);border-bottom-color:var(--yellow)}
 .tab-mobile-select{display:none}
+.mobile-break{display:none}
 .tab-btn.t-sniper.active{color:var(--green);border-bottom-color:var(--green)}
 .tab-btn.t-fade.active{color:var(--accent);border-bottom-color:var(--accent)}
 .tab-btn.t-magnet.active{color:var(--teal);border-bottom-color:var(--teal)}
@@ -500,6 +501,11 @@ body.nav-open .nav-overlay{display:block}
      so they never do, even though they're never actually visible on touch. */
   .tooltip{max-width:min(280px,calc(100vw - 40px));min-width:0}
 
+  /* VolumeEdge / Pro [Guide|Sniper|EXH] - breaks right after "Edge" on
+     mobile instead of after the full "VolumeEdgePro" unit, so the hero
+     heading reads as two-to-four short lines instead of one long one. */
+  .mobile-break{display:block}
+
   /* Monospace formula/pseudocode blocks (position sizing worked examples etc.)
      have long unbroken lines that don't wrap by default at this font/width
      combination - forced to wrap rather than push the page wider. */
@@ -632,7 +638,7 @@ body.nav-open .nav-overlay{display:block}
 <div class="hero">
   <div class="version-badge">VolumeEdgePro v2.12 — Aug 2026</div>
   <div class="hero-badge">FRVP MASTER PRO v3.2 → VOLUMEEDGEPRO v2.12</div>
-  <h1><span style="color:#fff">Volume</span><span style="color:#FFD700">Edge</span><span style="color:#fff">Pro</span><br><span>Parameter Guide</span></h1>
+  <h1><span style="color:#fff">Volume</span><span style="color:#FFD700">Edge</span><br class="mobile-break"><span style="color:#fff">Pro</span><br><span>Parameter Guide</span></h1>
   <p class="hero-sub">Bin-Based Signal Engine · Phase 1 Gates · Discord Alerts · Trading Workflow</p>
   <div class="hero-pills">
     <div class="pill"><strong>cTrader</strong> / .NET 6</div>
@@ -3219,7 +3225,7 @@ body.nav-open .nav-overlay{display:block}
   <main class="plan-main">
     <div class="plan-hero">
       <div class="plan-hero-badge cbot">CBOT · VOLUMEEDGEPRO SNIPER v2.24</div>
-      <h1><span class="hl-cbot"><span style="color:#fff">Volume</span><span style="color:#FFD700">Edge</span><span style="color:#fff">Pro</span> <span style="color:#FF6B9D">Sniper</span></span><br>Automated PDC Stop-Order Entries</h1>
+      <h1><span class="hl-cbot"><span style="color:#fff">Volume</span><span style="color:#FFD700">Edge</span><br class="mobile-break"><span style="color:#fff">Pro</span> <span style="color:#FF6B9D">Sniper</span></span><br>Automated PDC Stop-Order Entries</h1>
       <p class="plan-hero-sub">EDGE EXH signal + PDC cross · Percent-risk sizing · Structural SL · No fixed TP</p>
       <div class="plan-pills">
         <div class="plan-pill"><strong>1 trade/symbol</strong> at a time</div>
@@ -3759,7 +3765,7 @@ IsOurTrade(label, comment) = (label == OrderLabel) || (comment == OrderLabel)
   <main class="plan-main">
     <div class="plan-hero">
       <div class="plan-hero-badge cbot">CBOT · VOLUMEEDGEPRO EXH v1.18</div>
-      <h1><span class="hl-cbot"><span style="color:#fff">Volume</span><span style="color:#FFD700">Edge</span><span style="color:#fff">Pro</span> <span style="color:#FF6B9D">EXH</span></span><br>Immediate EDGE EXH Stop-Order Entries</h1>
+      <h1><span class="hl-cbot"><span style="color:#fff">Volume</span><span style="color:#FFD700">Edge</span><br class="mobile-break"><span style="color:#fff">Pro</span> <span style="color:#FF6B9D">EXH</span></span><br>Immediate EDGE EXH Stop-Order Entries</h1>
       <p class="plan-hero-sub">EDGE EXH signal only, no PDC · Single-pass detection · Percent-risk sizing · Structural SL · No fixed TP</p>
       <div class="plan-pills">
         <div class="plan-pill"><strong>1 trade/symbol</strong> at a time</div>
