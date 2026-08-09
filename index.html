@@ -436,10 +436,67 @@ code{font-family:var(--font-mono);font-size:11px;background:rgba(108,140,255,.1)
 .upload-slot-caption{font-size:10px;color:rgba(255,255,255,.2);font-family:monospace}
 .upload-slot input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .upload-slot img{max-width:100%;border-radius:6px;margin-top:8px;display:block}
-.upload-section-title{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#90a4ae;margin:12px 0 8px;font-family:monospace}
+.upload-section-title{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#90a4ae;margin:12px 0 8px;font-family:monospace}/* ══════════════════════════════════════════════════════════════════
+   MOBILE / TABLET RESPONSIVE LAYER
+   Collapses both sidebar systems (.sidebar on the Guide tab,
+   .plan-sidebar on every other tab) into an off-canvas drawer opened
+   by a hamburger button, below 860px. Desktop layout above 860px is
+   completely untouched by anything in this block.
+   ══════════════════════════════════════════════════════════════════ */
+.nav-toggle{display:none;position:fixed;top:8px;left:8px;z-index:500;width:38px;height:38px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;align-items:center;justify-content:center;flex-direction:column;gap:4px}
+.nav-toggle span{display:block;width:18px;height:2px;background:var(--yellow);border-radius:2px}
+.nav-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:250}
+body.nav-open .nav-overlay{display:block}
+
+@media (max-width: 860px){
+  .nav-toggle{display:flex}
+
+  /* Guide tab: turn the fixed grid into a single column, sidebar becomes an off-canvas drawer */
+  .layout{grid-template-columns:1fr !important}
+  .sidebar{position:fixed !important;top:0;left:0;height:100vh;width:260px;max-width:82vw;z-index:300;transform:translateX(-100%);transition:transform .25s ease;box-shadow:2px 0 24px rgba(0,0,0,.5)}
+  body.nav-open .sidebar{transform:translateX(0)}
+
+  /* Every other tab: plan-wrap stacks, plan-sidebar becomes the same kind of drawer */
+  .plan-wrap{flex-direction:column}
+  .plan-sidebar{position:fixed !important;top:0;left:0;height:100vh;width:260px;max-width:82vw;z-index:300;transform:translateX(-100%);transition:transform .25s ease;box-shadow:2px 0 24px rgba(0,0,0,.5)}
+  body.nav-open .plan-sidebar{transform:translateX(0)}
+
+  /* Top tab-switcher bar: scrolls horizontally instead of clipping/wrapping */
+  .tab-bar{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tab-bar-brand{min-width:0;padding:0 10px 0 54px}
+  .tab-bar-brand .b-name{font-size:11px}
+  .tab-btn{padding:0 10px;font-size:11px}
+
+  /* Timezone bar: allow wrapping instead of clipping the clock/dropdown */
+  .tz-bar{flex-wrap:wrap;height:auto !important;padding:6px 10px}
+
+  /* Give content room for the wrapped tab-bar + tz-bar instead of a fixed desktop offset */
+  .tab-page{padding-top:150px !important}
+
+  /* Parameter tables: horizontal scroll instead of getting crushed or forcing page-wide scroll */
+  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap}
+  table thead,table tbody{display:table;width:100%}
+
+  /* Multi-column layout grids throughout the guide/plan content: stack to one column */
+  .color-grid,.signal-grid,.toc-grid,.validated-grid,.tf-row,.phase-row,
+  .quality-grid,.amd-flow,.trade-params{grid-template-columns:1fr !important}
+  .step{grid-template-columns:1fr !important}
+
+  body{font-size:13px}
+  main,.plan-main{padding:16px !important}
+}
+
+@media (max-width: 480px){
+  .tab-bar-brand{padding-left:50px}
+  .tz-bar{font-size:11px}
+}
 </style>
 </head>
 <body>
+
+<!-- Mobile nav toggle - opens whichever sidebar (.sidebar or .plan-sidebar) is active for the current tab -->
+<button class="nav-toggle" id="navToggle" aria-label="Open menu"><span></span><span></span><span></span></button>
+<div class="nav-overlay" id="navOverlay"></div>
 <!-- TIMEZONE BAR -->
 <div class="tz-bar" id="tz-bar">
   <span class="tz-bar-icon">🕐</span>
@@ -4568,11 +4625,42 @@ function applyTimezone() {
   });
 }
 
+// ── Mobile nav toggle (hamburger) ───────────────────────────────────────────
+// One shared toggle drives whichever sidebar is actually in the DOM for the
+// current tab (.sidebar on the Guide tab, .plan-sidebar on every other tab) -
+// only one is ever visible at a time since tabs are shown/hidden via
+// .tab-page.active, so a single body-level class is enough for all of them.
+(function() {
+  var toggle  = document.getElementById('navToggle');
+  var overlay = document.getElementById('navOverlay');
+  if (!toggle || !overlay) return;
+
+  function closeNav() { document.body.classList.remove('nav-open'); }
+  function toggleNav() { document.body.classList.toggle('nav-open'); }
+
+  toggle.addEventListener('click', toggleNav);
+  overlay.addEventListener('click', closeNav);
+
+  // Auto-close after tapping any nav link - otherwise the drawer stays open
+  // covering the page after navigating to a new section on mobile.
+  document.querySelectorAll('.nav-item, .plan-nav-item, .tab-btn').forEach(function(el) {
+    el.addEventListener('click', closeNav);
+  });
+})();
+
 // ── Live clock ────────────────────────────────────────────────────────────
+// Date.getTime() is already an absolute, timezone-independent epoch value -
+// no correction for the browser's own local offset is needed or correct.
+// The previous version subtracted the browser's local offset from the
+// target offset, which only produced the right answer when the two
+// happened to cancel out (i.e. only when the browser's own timezone
+// already matched the selected one) - any other combination showed a
+// wrong time, confirmed for real: a Hong Kong-set browser selecting
+// Hong Kong showed raw UTC time instead of HKT.
 function updateClock() {
   var off  = getOffsetMins();
   var now  = new Date();
-  var ms   = now.getTime() + (off - (-now.getTimezoneOffset())) * 60000;
+  var ms   = now.getTime() + off * 60000;
   var d    = new Date(ms);
   var pad  = function(n){ return String(n).padStart(2,'0'); };
   var el   = document.getElementById('tz-clock');
